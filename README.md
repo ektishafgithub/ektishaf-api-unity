@@ -25,7 +25,7 @@ Welcome to Ektishaf Unity API!.<br/>
 Please read below to install the API package and have an understanding of the core functionalities to start right away.
 <br/><br/>
 
-### Prerequisites! 👋
+### Prerequisites
 Unity Version: 2022.3+
 <br/><br/>
 
