@@ -13,7 +13,7 @@ _If you have questions, feel free to email us at mail@ektishaf.com_ or check our
 <br/><br/>
 
 > [!IMPORTANT]
-> * We never stores any private key or password in any database
+> * We never store any private key or password in any database
 > * We never ask for any private information from our customers
 
 > [!TIP]
