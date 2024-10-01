@@ -31,7 +31,7 @@ Unity Version: 2022.3+
 
 ### 🔧 Install Package 
 ```
-1. In Unity Editor, Expand Windows Menu -> Click on Package Manager.
+1. In Unity Editor, Expand Window Menu -> Click on Package Manager.
 2. Press + dropdown on the top left of Package Manager window and select "Add package from git URL".
 3. Copy and paste https://github.com/ektishafgithub/ektishaf-api-unity.git and press Add.
 ```
