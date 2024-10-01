@@ -59,7 +59,7 @@ namespace Ektishaf
                     Directory.CreateDirectory(OutputDir);
                 }
 
-                PostJsonDataAsync(RequestManager.ABIUrl, RequestManager.CreateABIRequest(abi, true), (success, result, error) =>
+                PostJsonDataAsync(RequestManager.ABIUrl, RequestManager.Singleton.CreateABIRequest(abi, true), (success, result, error) =>
                 {
                     if (success)
                     {
