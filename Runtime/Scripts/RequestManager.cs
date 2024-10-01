@@ -148,7 +148,7 @@ namespace Ektishaf
             }, ticket);
         }
 
-        public void External(string privateKey, string password, Action<bool, string, string, string> callback, string ticket)
+        public void External(string privateKey, string password, Action<bool, string, string, string> callback)
         {
             string body = CreateExternalWalletRequest(privateKey, password);
             PostRequest(ExternalUrl, body, (success, result, error) =>
@@ -165,7 +165,7 @@ namespace Ektishaf
                 {
                     callback?.Invoke(false, null, null, error);
                 }
-            }, ticket);
+            });
         }
 
         public void Reveal(string ticket, string password, Action<bool, string, string, string, string, string> callback)
@@ -296,7 +296,7 @@ namespace Ektishaf
         #endregion
 
         #region Request Helper Methods
-        public static string CreateBodyJson(Dictionary<string, JToken> properties)
+        public string CreateBodyJson(Dictionary<string, JToken> properties)
         {
             JObject JsonObject = new JObject();
             foreach (KeyValuePair<string, JToken> entry in properties)
@@ -306,37 +306,37 @@ namespace Ektishaf
             return JsonObject.ToString();
         }
 
-        public static string CreateAuthRequest(string password)
+        public string CreateAuthRequest(string password)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "password", password } });
         }
 
-        public static string CreateExternalWalletRequest(string privateKey, string password)
+        public string CreateExternalWalletRequest(string privateKey, string password)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "privateKey", privateKey }, { "password", password } });
         }
 
-        public static string CreateSignRequest(string message)
+        public string CreateSignRequest(string message)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "message", message } });
         }
 
-        public static string CreateVerifyRequest(string address, string message, string signature)
+        public string CreateVerifyRequest(string address, string message, string signature)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "address", address }, { "message", message }, { "signature", signature } });
         }
 
-        public static string CreateABIRequest(string abi, bool minimal)
+        public string CreateABIRequest(string abi, bool minimal)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "abi", abi }, { "minimal", minimal } });
         }
 
-        public static string CreateBalanceRequest(string rpc)
+        public string CreateBalanceRequest(string rpc)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "rpc", rpc } });
         }
 
-        public static string CreateContractRequest(string rpc, string contract, string abi, string function, params object[] args)
+        public string CreateContractRequest(string rpc, string contract, string abi, string function, params object[] args)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "rpc", rpc }, { "contract", contract }, { "abi", abi }, { "function", function }, { "params", JToken.FromObject(args) } });
         }
