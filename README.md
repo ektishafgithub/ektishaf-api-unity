@@ -21,9 +21,24 @@ _If you have questions, feel free to email us at mail@ektishaf.com_ or check our
 > * We further suggest to use cryptographic services if you have planned to store any critical response data in a secured PlayerPrefs.
 
 ### Welcome! 👋
-Welcome to Ektishaf Unity API!.<br/>
-Please read below to install the API package and have an understanding of the core functionalities to start right away.
+Welcome to Ektishaf Unity API!.<br/><br/>
+If you are a developer, you might be thinking about where to start and in which direction to go to make it work in a game.<br/>
+So to make it very simple here are the three things to keep in mind. <br/>
+
+1. **Smart Contract - A verified smart contract in hand that is deployed in any EVM compatible testnet, such as sepolia etc.**
+2. **API - An API that communicates with both smart contract (blockchain) and game.**
+3. **Game - An ongoing game project that supports API calls.**
+
+Please read below about the smart contract and how to install the API package to get started with the core functionalities right away.
 <br/><br/>
+
+### Smart Contract
+Our API provides you with a sample smart contract that is tested several times to make sure there are no loose points in terms of security.
+You can later on copy the code and deploy as your own smart contract on whichever EVM blockchain you prefer.
+For now, our sample verified smart contract is deployed on sepolia (testnet) and you can go through the code and other information to make yourself familiar with.
+
+This will push you fast forward towards understanding how this all works together with game.
+[Check our smart contract here](https://sepolia.etherscan.io/address/0x52fa3dEFa9358E9164a5fc5528C31351210E3039#code)
 
 ### Prerequisites
 Unity Version: 2022.3+
