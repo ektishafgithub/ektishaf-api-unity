@@ -12,5 +12,12 @@
     "name": "Ektishaf Ahwaz",
     "email": "mail@ektishaf.com",
     "url": "https://www.ektishaf.com"
-  }
+  },
+"samples": [
+        {
+            "displayName": "Ektishaf Blockchain API Demo",
+            "description": "Contains a demo to demonstrate blockchain communication",
+            "path": "Samples~/Demo"
+        }
+    ]
 }
