@@ -50,11 +50,17 @@ Unity Version: 2022.3+
 2. Press + dropdown on the top left of Package Manager window and select "Add package from git URL".
 3. Copy and paste https://github.com/ektishafgithub/ektishaf-api-unity.git and press Add.
 ```
-That's it the package will be added to Unity and all core functions can then be executed through **RequestManager.cs** file.
+After adding the package you can import sample as shown in the image below:
+
+![Demo Screenshot](https://github.com/user-attachments/assets/e8951312-0479-4749-910b-19c7d98b4d51)
+
+
+That's it, you can now open the Sample scene inside the imported samples.<br/>
+![Screenshot 2024-10-08 133307](https://github.com/user-attachments/assets/621a067b-333f-42cc-a206-3df297646c09)
 <br/><br/>
 
 ### 🔨 Unity Documentation
-This is a Unity documentation explaining each of the core functions in **RequestManager.cs** file.
+This is a Unity documentation explaining each of the core functions in **RequestManager.cs** file that are used in the Sample scene.
 
 #### Host
 Checks if the host is alive and returns a status code (200) with a welcome message showing readiness for blockchain interaction.
