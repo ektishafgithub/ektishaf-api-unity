@@ -227,7 +227,7 @@ namespace Ektishaf
             });
         }
 
-        public void Balance(string rpc, Action<bool, BigInteger, string> callback, string ticket)
+        public void Balance(string rpc, Action<bool, BigInteger, string, string> callback, string ticket)
         {
             string body = CreateBalanceRequest(rpc);
             PostRequest(BalanceUrl, body, (success, result, error) =>
@@ -235,18 +235,19 @@ namespace Ektishaf
                 Debug.Log($"{nameof(RequestManager)} - {nameof(Balance)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
                 {
-                    if (BigInteger.TryParse(ValidateString(JsonObject["data"].ToString()), out BigInteger balance))
+                    string data = ValidateString(JsonObject["data"].ToString());
+                    if (BigInteger.TryParse(data, out BigInteger balance))
                     {
-                        callback?.Invoke(true, balance, null);
+                        callback?.Invoke(true, balance, data.Substring(0, 5), null);
                     }
                     else
                     {
-                        callback?.Invoke(true, BigInteger.Zero, null);
+                        callback?.Invoke(true, BigInteger.Zero, data.Substring(0, 5), null);
                     }
                 }
                 else
                 {
-                    callback?.Invoke(false, BigInteger.Zero, error);
+                    callback?.Invoke(false, BigInteger.Zero, "0", error);
                 }
             }, ticket);
         }
@@ -357,58 +358,6 @@ namespace Ektishaf
         public string ValidateString(string value)
         {
             return value.Trim(new[] { '\'', '"' }).Replace("\\\"", "\"");
-        }
-        #endregion
-
-        #region PlayerPrefs
-        public static List<List<string>> LoadWallets()
-        {
-            return PlayerPrefs.HasKey(SAVE_KEY) ? JsonConvert.DeserializeObject<List<List<string>>>(PlayerPrefs.GetString(SAVE_KEY)) : new List<List<string>>();
-        }
-
-        public static void SaveWallet(string address, string ticket)
-        {
-            List<List<string>> wallets = LoadWallets();
-            if (!TryUpdate(address, ticket, ref wallets))
-            {
-                wallets.Add(new List<string>() { address, ticket });
-            }
-            PlayerPrefs.SetString(SAVE_KEY, JsonConvert.SerializeObject(wallets));
-        }
-
-        public static bool TryFind(string address, List<List<string>> wallets, out int index)
-        {
-            for (int i = 0; i < wallets.Count; i++)
-            {
-                if (address == wallets[i][0])
-                {
-                    index = i;
-                    return true;
-                }
-            }
-            index = -1;
-            return false;
-        }
-
-        public static bool TryUpdate(string address, string ticket, ref List<List<string>> wallets)
-        {
-            if (TryFind(address, wallets, out int index))
-            {
-                wallets[index][1] = ticket;
-            }
-            return false;
-        }
-
-        public static bool TryGetTicket(string address, out string ticket)
-        {
-            List<List<string>> wallets = LoadWallets();
-            if (TryFind(address, wallets, out int index))
-            {
-                ticket = wallets[index][1];
-                return true;
-            }
-            ticket = null;
-            return false;
         }
         #endregion
     }
