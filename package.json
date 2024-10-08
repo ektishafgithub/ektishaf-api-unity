@@ -15,7 +15,7 @@
   },
 "samples": [
         {
-            "displayName": "Ektishaf Blockchain API Demo",
+            "displayName": "Blockchain API Demo",
             "description": "Contains a demo to demonstrate blockchain communication",
             "path": "Samples~/Demo"
         }
