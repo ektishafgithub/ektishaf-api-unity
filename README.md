@@ -57,6 +57,12 @@ After adding the package you can import sample as shown in the image below:
 
 That's it, you can now open the Sample scene inside the imported samples.<br/>
 ![Screenshot 2024-10-08 133307](https://github.com/user-attachments/assets/621a067b-333f-42cc-a206-3df297646c09)
+
+> [!NOTE]
+> When you run the **Sample** scene, you can click **Login** button on the first screen and use our default wallet.<br/>
+> Just select the available wallet address from the drop down.<br/>
+> Enter "**Ektishaf Ahwaz**" for password requirement and click **Submit**.<br/>
+> You can then click **GetNfts** button on the next screen and wait for the Nfts to be obtained on the address.
 <br/><br/>
 
 ### 🔨 Unity Documentation
