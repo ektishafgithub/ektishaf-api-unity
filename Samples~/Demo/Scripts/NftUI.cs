@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Ektishaf;
@@ -6,6 +7,17 @@ using Newtonsoft.Json.Linq;
 public class NftUI : MonoBehaviour
 {
     public GameObject content;
+
+    public static List<NftUI> Nfts = new List<NftUI>();
+
+    public void Clear()
+    {
+        for(int i = 0; i < content.transform.childCount; i++)
+        {
+            Destroy(content.transform.GetChild(i).gameObject);
+        }
+        Nfts.Clear();
+    }
 
     public void AddNFT(int id, int amount, string uri)
     {
@@ -27,20 +39,22 @@ public class NftUI : MonoBehaviour
 
         item.transform.SetParent(content.transform);
         item.transform.localScale = Vector3.one;
-
+        Nfts.Add(this);
         GetRawImage(uri, image);
     }
 
     private void GetRawImage(string uri, RawImage image)
     {
-        RequestManager.Singleton.GetRequest(uri, (success, result, error) =>
+        FindAnyObjectByType<Menu>().ShowLoading();
+        BlockchainService.Singleton.GetRequest(uri, (success, result, error) =>
         {
             if (success)
             {
                 JObject JsonObject = JObject.Parse(result);
-                RequestManager.Singleton.GetTexture(JsonObject["image"].ToString(), (success, texture, error) =>
+                BlockchainService.Singleton.GetTexture(JsonObject["image"].ToString(), (success, texture, error) =>
                 {
                     image.texture = texture;
+                    FindAnyObjectByType<Menu>().HideLoading();
                 });
             }
         });

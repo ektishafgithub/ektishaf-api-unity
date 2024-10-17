@@ -59,7 +59,7 @@ public class EktishafUtility : EditorWindow
                 Directory.CreateDirectory(Generated);
             }
 
-            PostJsonDataAsync(Ektishaf.RequestManager.ABIUrl, $"{{\"abi\":{abi}, \"minimal\":true}}", (success, result, error) =>
+            PostJsonDataAsync(Ektishaf.BlockchainService.ABIService, $"{{\"abi\":{abi}, \"minimal\":true}}", (success, result, error) =>
             {
                 if(success)
                 {
