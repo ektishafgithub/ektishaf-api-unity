@@ -66,7 +66,7 @@ That's it, you can now open the Sample scene inside the imported samples.<br/>
 <br/><br/>
 
 ### 🔨 Unity Documentation
-This is a Unity documentation explaining each of the core functions in **RequestManager.cs** file that are used in the Sample scene.
+This is a Unity documentation explaining each of the core functions in **BlockchainService.cs** file that are used in the Sample scene.
 
 #### Host
 Checks if the host is alive and returns a status code (200) with a welcome message showing readiness for blockchain interaction.
