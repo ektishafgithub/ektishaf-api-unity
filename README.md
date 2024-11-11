@@ -41,7 +41,7 @@ This will push you fast forward towards understanding how this all works togethe
 [Check our smart contract here](https://sepolia.etherscan.io/address/0x52fa3dEFa9358E9164a5fc5528C31351210E3039#code)
 
 ### Prerequisites
-Unity Version: 2022.3+
+Unity Version: 2022.3+ upto Unity 6
 <br/><br/>
 
 ### 🔧 Install Package 
