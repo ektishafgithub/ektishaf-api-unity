@@ -56,11 +56,13 @@ After adding the package you can import sample as shown in the image below:
 
 
 That's it, you can now open the Sample scene inside the imported samples.<br/>
+
 ![Screenshot 2024-10-08 133307](https://github.com/user-attachments/assets/621a067b-333f-42cc-a206-3df297646c09)
 
 > [!IMPORTANT]
-> If you don't see any text over buttons or UI then **Import TMP Essentials**. An easy way would be to select a text in hierarchy to trigger import as shown below.
-<img width="1267" alt="ImportTMPEssentials" src="https://github.com/user-attachments/assets/6a20fb96-3fa3-437c-a804-df8690fbc3dc"></br>
+> If you don't see any text over buttons or UI then **Import TMP Essentials**. You can import through **Windows->TextMeshPro->Import TMP Essential Resources**
+> or an easy way would be to select a text in hierarchy to trigger import as shown below.
+<img width="1267" alt="ImportTMPEssentials" src="https://github.com/user-attachments/assets/46fc83f8-6500-4ef0-a750-275706cbcdcc"></br>
 
 > [!NOTE]
 > When you run the **Sample** scene, you can click **Login** button on the first screen and use our default wallet.<br/>
