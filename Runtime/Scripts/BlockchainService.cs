@@ -11,41 +11,14 @@ namespace Ektishaf
 {
     public class BlockchainService : MonoBehaviour
     {
-        #region Constants
-        public const string RootService     = "https://api.ektishaf.com/v1/";
-        public const string RegisterService = RootService + "register";
-        public const string LoginService    = RootService + "login";
-        public const string ExternalService = RootService + "external";
-        public const string RevealService   = RootService + "reveal";
-        public const string BalanceService  = RootService + "balance";
-        public const string ABIService      = RootService + "abi";
-        public const string ReadService     = RootService + "read";
-        public const string WriteService    = RootService + "write";
-        public const string SignService     = RootService + "sign";
-        public const string VerifyService   = RootService + "verify";
-        #endregion
-
         #region Variables
-        public static BlockchainService Singleton = null;
+        protected BlockchainSettings config;
         #endregion
 
         #region Default Methods
-        private void Awake()
+        protected virtual void Awake()
         {
-            if (Singleton != null && Singleton != this)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                Singleton = this;
-                DontDestroyOnLoad(gameObject);
-            }
-        }
-
-        private  void Start()
-        {
-            Host((success, result) => { Debug.Log($"{nameof(Host)} - Success: {success}, Result: {result}"); });
+            config = (BlockchainSettings)BlockchainSettings.GetInstance();
         }
         #endregion
 
@@ -62,7 +35,7 @@ namespace Ektishaf
 
         public void GetRequest(string url, Action<bool, string, string> callback = null)
         {
-            Debug.Log($"{nameof(BlockchainService)} - {nameof(GetRequest)} - Url: {url}");
+            Log($"{nameof(BlockchainService)} - {nameof(GetRequest)} - Url: {url}");
             StartCoroutine(GetRequestCoroutine(url, callback));
         }
 
@@ -79,7 +52,7 @@ namespace Ektishaf
 
         public void PostRequest(string url, string body, Action<bool, string, string> callback = null, string ticket = null)
         {
-            Debug.Log($"{nameof(BlockchainService)} - {nameof(PostRequest)} - Request: {body}");
+            Log($"{nameof(BlockchainService)} - {nameof(PostRequest)} - Request: {body}");
             StartCoroutine(PostRequestCoroutine(url, body, callback, ticket));
         }
 
@@ -95,7 +68,7 @@ namespace Ektishaf
 
         public void GetTexture(string url, Action<bool, Texture, string> callback = null)
         {
-            Debug.Log($"{nameof(BlockchainService)} - {nameof(GetTexture)} - Url: {url}");
+            Log($"{nameof(BlockchainService)} - {nameof(GetTexture)} - Url: {url}");
             StartCoroutine(GetTextureCoroutine(url, callback));
         }
         #endregion
@@ -103,15 +76,15 @@ namespace Ektishaf
         #region Core Methods
         public void Host(Action<bool, string> callback)
         {
-            GetRequest(RootService, (success, result, error) => callback?.Invoke(success, result));
+            GetRequest(config.Op(), (success, result, error) => callback?.Invoke(success, result));
         }
         
         public void Register(string password, Action<bool, string, string, string> callback)
         {
             string body = CreateAuthRequest(password);
-            PostRequest(RegisterService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Register), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Register)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Register)} - Response - {result}");
 
                 if (success)
                 {
@@ -130,9 +103,9 @@ namespace Ektishaf
         public void Login(string ticket, string password, Action<bool, string, string, string> callback)
         {
             string body = CreateAuthRequest(password);
-            PostRequest(LoginService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Login), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Login)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Login)} - Response - {result}");
 
                 if (success)
                 {
@@ -151,9 +124,9 @@ namespace Ektishaf
         public void External(string privateKey, string password, Action<bool, string, string, string> callback)
         {
             string body = CreateExternalWalletRequest(privateKey, password);
-            PostRequest(ExternalService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.External), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(External)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(External)} - Response - {result}");
                 if (success)
                 {
                     JObject JsonObject = JObject.Parse(result);
@@ -171,9 +144,9 @@ namespace Ektishaf
         public void Reveal(string ticket, string password, Action<bool, string, string, string, string, string> callback)
         {
             string body = CreateAuthRequest(password);
-            PostRequest(RevealService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Reveal), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Reveal)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Reveal)} - Response - {result}");
                 if (success)
                 {
                     JObject JsonObject = JObject.Parse(result);
@@ -193,9 +166,9 @@ namespace Ektishaf
         public void Sign(string message, Action<bool, string, string, string> callback, string ticket)
         {
             string body = CreateSignRequest(message);
-            PostRequest(SignService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Sign), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Sign)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Sign)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
                 {
                     string message = JsonObject["message"]?.ToString();
@@ -212,9 +185,9 @@ namespace Ektishaf
         public void Verify(string address, string message, string signature, Action<bool, bool, string> callback)
         {
             string body = CreateVerifyRequest(address, message, signature);
-            PostRequest(VerifyService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Verify), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Verify)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Verify)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
                 {
                     bool verification = bool.Parse(JsonObject["verification"]?.ToString());
@@ -230,9 +203,9 @@ namespace Ektishaf
         public void Balance(string rpc, Action<bool, BigInteger, string, string> callback, string ticket)
         {
             string body = CreateBalanceRequest(rpc);
-            PostRequest(BalanceService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Balance), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Balance)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Balance)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
                 {
                     string data = ValidateString(JsonObject["data"].ToString());
@@ -255,9 +228,9 @@ namespace Ektishaf
         public void ABI(string abi, bool minimal, Action<bool, string[], string> callback)
         {
             string body = CreateABIRequest(abi, minimal);
-            PostRequest(ABIService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.ABI), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(ABI)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(ABI)} - Response - {result}");
 
                 if (success)
                 {
@@ -274,25 +247,49 @@ namespace Ektishaf
         public void Read(string rpc, string contract, string abi, string function, Action<bool, JObject, string> callback, string ticket, params object[] args)
         {
             string body = CreateContractRequest(rpc, contract, abi, function, args);
-            PostRequest(ReadService, body, (success, result, error) =>
+            PostRequest(config.Op(ServOp.Read), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Read)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Read)} - Response - {result}");
                 JObject JsonObject = null;
                 bool normal = success && IsExecNormal(result, out JsonObject);
                 callback?.Invoke(normal, JsonObject, normal ? null : error);
             }, ticket);
         }
 
-        public void Write(string rpc, string contract, string abi, string function, Action<bool, JObject, string> callback, string token, params object[] args)
+        public void Read(string rpc, string contract, string funcSig, Action<bool, JObject, string> callback, string ticket, params object[] args)
         {
-            string body = CreateContractRequest(rpc, contract, abi, function, args);
-            PostRequest(WriteService, body, (success, result, error) =>
+            string body = CreateContractRequest(rpc, contract, ExtractFunctionABI(funcSig), ExtractFunctionName(funcSig), args);
+            PostRequest(config.Op(ServOp.Read), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Write)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Read)} - Response - {result}");
                 JObject JsonObject = null;
                 bool normal = success && IsExecNormal(result, out JsonObject);
                 callback?.Invoke(normal, JsonObject, normal ? null : error);
-            }, token);
+            }, ticket);
+        }
+
+        public void Write(string rpc, string contract, string abi, string function, Action<bool, JObject, string> callback, string ticket, params object[] args)
+        {
+            string body = CreateContractRequest(rpc, contract, abi, function, args);
+            PostRequest(config.Op(ServOp.Write), body, (success, result, error) =>
+            {
+                Log($"{nameof(BlockchainService)} - {nameof(Write)} - Response - {result}");
+                JObject JsonObject = null;
+                bool normal = success && IsExecNormal(result, out JsonObject);
+                callback?.Invoke(normal, JsonObject, normal ? null : error);
+            }, ticket);
+        }
+
+        public void Write(string rpc, string contract, string funcSig, Action<bool, JObject, string> callback, string ticket, params object[] args)
+        {
+            string body = CreateContractRequest(rpc, contract, ExtractFunctionABI(funcSig), ExtractFunctionName(funcSig), args);
+            PostRequest(config.Op(ServOp.Write), body, (success, result, error) =>
+            {
+                Log($"{nameof(BlockchainService)} - {nameof(Write)} - Response - {result}");
+                JObject JsonObject = null;
+                bool normal = success && IsExecNormal(result, out JsonObject);
+                callback?.Invoke(normal, JsonObject, normal ? null : error);
+            }, ticket);
         }
         #endregion
 
@@ -358,6 +355,22 @@ namespace Ektishaf
         public string ValidateString(string value)
         {
             return value.Trim(new[] { '\'', '"' }).Replace("\\\"", "\"");
+        }
+
+        public string ExtractFunctionABI(string funcSig)
+        {
+            return @$"[""{funcSig.Trim(new[] { '[', ']', '"' })}""]";
+        }
+
+        public string ExtractFunctionName(string funcSig)
+        {
+            string func = funcSig.Trim(new[] { '[', ']', '"' }).Split(" ")[1];
+            return func.Substring(0, func.IndexOf("("));
+        }
+
+        public void Log(string message)
+        {
+            if (config.ShowLogs) Debug.Log(message);
         }
         #endregion
     }

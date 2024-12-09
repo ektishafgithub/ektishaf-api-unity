@@ -1,6 +1,6 @@
 {
   "name": "com.ektishaf.api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Blockchain API",
   "description": "This is an official package for Blockchain API which enables the game to interact with EVM based smart contracts with ease, whether it be NFTs or other tokens. \n\nMain features: \n\u25AA Create new wallets or import existing wallets at runtime \n\u25AA Seemless transaction experience, no need to go out of the game \n\u25AA Build-in NFT smart contract provided for implemention right away\n\nNote: Please keep track of the latest updates on our official website\nhttps://www.ektishaf.com",
   "unity": "2022.1",

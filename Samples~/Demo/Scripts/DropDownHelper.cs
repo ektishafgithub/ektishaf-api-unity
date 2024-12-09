@@ -8,12 +8,15 @@ public class DropDownHelper : MonoBehaviour
     public GameObject content;
     public GameObject item;
 
-    public static string SelectedAddress;
+    public string GetSelectedAddress()
+    {
+        if (dropdown.options.Count <= 0) return "";
+        return dropdown.options[dropdown.value].text;
+    }
 
     private void Awake()
     {
-        if (GetComponent<TMP_Dropdown>())
-            dropdown = GetComponent<TMP_Dropdown>();
+        dropdown = GetComponent<TMP_Dropdown>();
     }
 
     private void OnEnable()
@@ -23,10 +26,6 @@ public class DropDownHelper : MonoBehaviour
 
     private void Start()
     {
-        dropdown.onValueChanged.AddListener((index) => {
-            if (index == 0) return;
-            SelectedAddress = dropdown.options[index].text;
-        });
         Refresh();
         Resize();
     }
@@ -34,8 +33,7 @@ public class DropDownHelper : MonoBehaviour
     public void Refresh()
     {
         dropdown.options.Clear();
-        dropdown.options.Add(new TMP_Dropdown.OptionData() { text = "CHOOSE YOUR WALLET ..." });
-        dropdown.options.Add(new TMP_Dropdown.OptionData() { text = Menu.SampleAddress.ToUpper() });
+        dropdown.options.Add(new TMP_Dropdown.OptionData() { text = BlockchainServiceUnity.Singleton.Config.TestWalletAddress.ToUpper() });
     }
 
     public void Resize()
