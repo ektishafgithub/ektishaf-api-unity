@@ -20,10 +20,10 @@ public class BlockchainSettings : ScriptableObject
     [Tooltip("A test ticket provided to allow authorization for demo blockchain operation.")]
     public string TestTicket;
 
-    [Tooltip("An ipfs url to access NFT's assets on blockchain. i.e. Pinata gateway url. (This property is only for Studio who owns the contract.")]
+    [Tooltip("An ipfs url to access NFT's assets on blockchain. i.e. Pinata gateway url. (This property is only for Studio who owns the contract)")]
     public string DataUrl;
 
-    [Tooltip("The metadata hash obtained when all metadatas are uploaded for the NFTs. (This property is only for Studio who owns the contract.)")]
+    [Tooltip("The metadata hash obtained when all metadatas are uploaded for the NFTs. (This property is only for Studio who owns the contract)")]
     public string MetadataHash;
 
     [Tooltip("Shows or hides logs.")]
@@ -72,7 +72,7 @@ public class BlockchainSettings : ScriptableObject
     {
         if(!RpcDictionary.ContainsKey(RpcKey))
         {
-            Debug.LogError($"Could not find RpcKey: {RpcKey} in the list, please make sure to specifiy a valid RpcKey.");
+            Debug.LogError($"Could not find RpcKey: {RpcKey} in the list, please make sure to specify a valid RpcKey.");
             return "";
         }
         return RpcDictionary[RpcKey];
