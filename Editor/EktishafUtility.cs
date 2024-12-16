@@ -60,8 +60,7 @@ public class EktishafUtility : EditorWindow
                 Directory.CreateDirectory(GeneratedDirectory);
             }
 
-            //PostJsonDataAsync(((BlockchainSettings)BlockchainSettings.GetInstance()).Op(ServOp.ABI), $"{{\"abi\":{Abi}, \"minimal\":true}}", (success, result, error) =>
-            PostJsonDataAsync(BlockchainSettings.GetOrCreateSettings().Op(Ektishaf.ServOp.ABI), $"{{\"abi\":{Abi}, \"minimal\":true}}", (success, result, error) =>
+            PostJsonDataAsync(BlockchainSettings.GetOrCreateSettings().Op(ServOp.ABI), $"{{\"abi\":{Abi}, \"minimal\":true}}", (success, result, error) =>
             {
                 if (success)
                 {

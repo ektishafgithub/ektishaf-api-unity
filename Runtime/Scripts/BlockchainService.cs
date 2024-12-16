@@ -305,7 +305,7 @@ namespace Ektishaf
             string body = CreateAccountsRequest(registers, password);
             PostRequest(Config.Op(ServOp.Accounts), body, (success, result, error) =>
             {
-                Debug.Log($"{nameof(BlockchainService)} - {nameof(Accounts)} - Response - {result}");
+                Log($"{nameof(BlockchainService)} - {nameof(Accounts)} - Response - {result}");
                 JObject JsonObject = JObject.Parse(result);
                 JArray array = JArray.FromObject(JsonObject["accounts"]);
                 List<EktishafAccount> accounts = JsonConvert.DeserializeObject<List<EktishafAccount>>(array.ToString());
