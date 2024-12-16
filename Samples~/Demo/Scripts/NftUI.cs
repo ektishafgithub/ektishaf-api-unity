@@ -6,6 +6,8 @@ public class NftUI : MonoBehaviour
 {
     public bool isDownloaded;
     public string uri;
+    public int id;
+    public int amount;
 
     public void GetRawImage()
     {

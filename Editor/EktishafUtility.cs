@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEditor;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using Ektishaf;
 #if UNITY_2019_3_OR_NEWER && UNITY_EDITOR
 using UnityEditor.Compilation;
 #elif UNITY_2017_1_OR_NEWER && UNITY_EDITOR
@@ -58,7 +60,8 @@ public class EktishafUtility : EditorWindow
                 Directory.CreateDirectory(GeneratedDirectory);
             }
 
-            PostJsonDataAsync(((BlockchainSettings)BlockchainSettings.GetInstance()).Op(ServOp.ABI), $"{{\"abi\":{Abi}, \"minimal\":true}}", (success, result, error) =>
+            //PostJsonDataAsync(((BlockchainSettings)BlockchainSettings.GetInstance()).Op(ServOp.ABI), $"{{\"abi\":{Abi}, \"minimal\":true}}", (success, result, error) =>
+            PostJsonDataAsync(BlockchainSettings.GetOrCreateSettings().Op(Ektishaf.ServOp.ABI), $"{{\"abi\":{Abi}, \"minimal\":true}}", (success, result, error) =>
             {
                 if (success)
                 {
@@ -78,7 +81,7 @@ public class EktishafUtility : EditorWindow
         EditorGUILayout.EndScrollView();
     }
 
-    private async void PostJsonDataAsync(string url, string body, Action<bool, string, string> callback)
+    private static async void PostJsonDataAsync(string url, string body, Action<bool, string, string> callback)
     {
         using (var client = new HttpClient())
         {
@@ -161,6 +164,51 @@ public class EktishafUtility : EditorWindow
 #if UNITY_EDITOR
             //AssetDatabase.Refresh();
 #endif
+        }
+    }
+
+    [MenuItem("Ektishaf/Generate New Accounts", false, 100)]
+    public static void GenerateNewAccounts()
+    {
+        BlockchainSettings settings = BlockchainSettings.GetOrCreateSettings();
+        if (settings)
+        {
+            if (settings.Accounts.Count > 10)
+            {
+                Debug.Log("Creating more than 10 accounts is not allowed.");
+                return;
+            }
+            if (string.IsNullOrEmpty(settings.GenerateAccountsWithPassword) || string.IsNullOrWhiteSpace(settings.GenerateAccountsWithPassword))
+            {
+                Debug.Log("Please specify an account password in Project Settings->Ektishaf->Accounts->GenerateAccountsWithPassword to be used for new accounts.");
+                return;
+            }
+
+            string body = $"{{\"registers\":{settings.MaxAccountsPerRequest}, \"password\":\"{settings.GenerateAccountsWithPassword}\" }}";
+            Debug.Log($"{nameof(EktishafUtility)} - {nameof(GenerateNewAccounts)} - Generating Accounts, Please Wait ...");
+            PostJsonDataAsync(BlockchainSettings.GetOrCreateSettings().Op(ServOp.Accounts), body, (success, result, error) =>
+            {
+                Debug.Log($"{nameof(EktishafUtility)} - {nameof(GenerateNewAccounts)} - Response - {result}");
+                if (success)
+                {
+                    JObject JsonObject = JObject.Parse(result);
+                    JArray array = JArray.FromObject(JsonObject["accounts"]);
+                    List<EktishafAccount> accounts = JsonConvert.DeserializeObject<List<EktishafAccount>>(array.ToString());
+                    if (accounts.Count > 0)
+                    {
+                        settings.Accounts.AddRange(accounts);
+                        for (int i = 0; i < accounts.Count; i++)
+                        {
+                            Debug.Log($"Generated Account {i + 1}: {accounts[i].Address}");
+                        }
+                        Debug.Log($"{nameof(EktishafUtility)} - {nameof(GenerateNewAccounts)} - New accounts are created successfully.");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"Failed to create accounts with error, {error}");
+                }
+            });
         }
     }
 }

@@ -12,13 +12,21 @@ namespace Ektishaf
     public class BlockchainService : MonoBehaviour
     {
         #region Variables
-        protected BlockchainSettings config;
+        [HideInInspector]
+        public BlockchainSettings Config;
+
+        [HideInInspector]
+        public EktishafNetwork CurrentNetwork;
+
+        [HideInInspector]
+        public EktishafAccount CurrentAccount;
         #endregion
 
         #region Default Methods
         protected virtual void Awake()
         {
-            config = (BlockchainSettings)BlockchainSettings.GetInstance();
+            Config = Resources.Load<BlockchainSettings>("BlockchainSettings");
+            CurrentNetwork = Config.Networks[0];
         }
         #endregion
 
@@ -76,13 +84,13 @@ namespace Ektishaf
         #region Core Methods
         public void Host(Action<bool, string> callback)
         {
-            GetRequest(config.Op(), (success, result, error) => callback?.Invoke(success, result));
+            GetRequest(Config.Op(), (success, result, error) => callback?.Invoke(success, result));
         }
         
         public void Register(string password, Action<bool, string, string, string> callback)
         {
             string body = CreateAuthRequest(password);
-            PostRequest(config.Op(ServOp.Register), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Register), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Register)} - Response - {result}");
 
@@ -103,7 +111,7 @@ namespace Ektishaf
         public void Login(string ticket, string password, Action<bool, string, string, string> callback)
         {
             string body = CreateAuthRequest(password);
-            PostRequest(config.Op(ServOp.Login), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Login), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Login)} - Response - {result}");
 
@@ -124,7 +132,7 @@ namespace Ektishaf
         public void External(string privateKey, string password, Action<bool, string, string, string> callback)
         {
             string body = CreateExternalWalletRequest(privateKey, password);
-            PostRequest(config.Op(ServOp.External), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.External), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(External)} - Response - {result}");
                 if (success)
@@ -144,7 +152,7 @@ namespace Ektishaf
         public void Reveal(string ticket, string password, Action<bool, string, string, string, string, string> callback)
         {
             string body = CreateAuthRequest(password);
-            PostRequest(config.Op(ServOp.Reveal), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Reveal), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Reveal)} - Response - {result}");
                 if (success)
@@ -166,7 +174,7 @@ namespace Ektishaf
         public void Sign(string message, Action<bool, string, string, string> callback, string ticket)
         {
             string body = CreateSignRequest(message);
-            PostRequest(config.Op(ServOp.Sign), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Sign), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Sign)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
@@ -185,7 +193,7 @@ namespace Ektishaf
         public void Verify(string address, string message, string signature, Action<bool, bool, string> callback)
         {
             string body = CreateVerifyRequest(address, message, signature);
-            PostRequest(config.Op(ServOp.Verify), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Verify), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Verify)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
@@ -200,10 +208,10 @@ namespace Ektishaf
             });
         }
 
-        public void Balance(string rpc, Action<bool, BigInteger, string, string> callback, string ticket)
+        public void Balance(string rpc, string address, Action<bool, BigInteger, string, string> callback)
         {
-            string body = CreateBalanceRequest(rpc);
-            PostRequest(config.Op(ServOp.Balance), body, (success, result, error) =>
+            string body = CreateBalanceRequest(rpc, address);
+            PostRequest(Config.Op(ServOp.Balance), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Balance)} - Response - {result}");
                 if (success && IsExecNormal(result, out JObject JsonObject))
@@ -222,13 +230,13 @@ namespace Ektishaf
                 {
                     callback?.Invoke(false, BigInteger.Zero, "0", error);
                 }
-            }, ticket);
+            });
         }
 
         public void ABI(string abi, bool minimal, Action<bool, string[], string> callback)
         {
             string body = CreateABIRequest(abi, minimal);
-            PostRequest(config.Op(ServOp.ABI), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.ABI), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(ABI)} - Response - {result}");
 
@@ -247,7 +255,7 @@ namespace Ektishaf
         public void Read(string rpc, string contract, string abi, string function, Action<bool, JObject, string> callback, string ticket, params object[] args)
         {
             string body = CreateContractRequest(rpc, contract, abi, function, args);
-            PostRequest(config.Op(ServOp.Read), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Read), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Read)} - Response - {result}");
                 JObject JsonObject = null;
@@ -259,7 +267,7 @@ namespace Ektishaf
         public void Read(string rpc, string contract, string funcSig, Action<bool, JObject, string> callback, string ticket, params object[] args)
         {
             string body = CreateContractRequest(rpc, contract, ExtractFunctionABI(funcSig), ExtractFunctionName(funcSig), args);
-            PostRequest(config.Op(ServOp.Read), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Read), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Read)} - Response - {result}");
                 JObject JsonObject = null;
@@ -271,7 +279,7 @@ namespace Ektishaf
         public void Write(string rpc, string contract, string abi, string function, Action<bool, JObject, string> callback, string ticket, params object[] args)
         {
             string body = CreateContractRequest(rpc, contract, abi, function, args);
-            PostRequest(config.Op(ServOp.Write), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Write), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Write)} - Response - {result}");
                 JObject JsonObject = null;
@@ -283,9 +291,34 @@ namespace Ektishaf
         public void Write(string rpc, string contract, string funcSig, Action<bool, JObject, string> callback, string ticket, params object[] args)
         {
             string body = CreateContractRequest(rpc, contract, ExtractFunctionABI(funcSig), ExtractFunctionName(funcSig), args);
-            PostRequest(config.Op(ServOp.Write), body, (success, result, error) =>
+            PostRequest(Config.Op(ServOp.Write), body, (success, result, error) =>
             {
                 Log($"{nameof(BlockchainService)} - {nameof(Write)} - Response - {result}");
+                JObject JsonObject = null;
+                bool normal = success && IsExecNormal(result, out JsonObject);
+                callback?.Invoke(normal, JsonObject, normal ? null : error);
+            }, ticket);
+        }
+
+        public void Accounts(int registers, string password, Action<bool, List<EktishafAccount>, string> callback)
+        {
+            string body = CreateAccountsRequest(registers, password);
+            PostRequest(Config.Op(ServOp.Accounts), body, (success, result, error) =>
+            {
+                Debug.Log($"{nameof(BlockchainService)} - {nameof(Accounts)} - Response - {result}");
+                JObject JsonObject = JObject.Parse(result);
+                JArray array = JArray.FromObject(JsonObject["accounts"]);
+                List<EktishafAccount> accounts = JsonConvert.DeserializeObject<List<EktishafAccount>>(array.ToString());
+                callback?.Invoke(success, accounts, success ? null : error);
+            });
+        }
+
+        public void Send(string rpc, string to, string amount, string ticket, Action<bool, JObject, string> callback)
+        {
+            string body = CreateSendRequest(rpc, to, amount);
+            PostRequest(Config.Op(ServOp.Send), body, (success, result, error) =>
+            {
+                Log($"{nameof(BlockchainService)} - {nameof(Send)} - Response - {result}");
                 JObject JsonObject = null;
                 bool normal = success && IsExecNormal(result, out JsonObject);
                 callback?.Invoke(normal, JsonObject, normal ? null : error);
@@ -329,14 +362,24 @@ namespace Ektishaf
             return CreateBodyJson(new Dictionary<string, JToken>() { { "abi", abi }, { "minimal", minimal } });
         }
 
-        public string CreateBalanceRequest(string rpc)
+        public string CreateBalanceRequest(string rpc, string address)
         {
-            return CreateBodyJson(new Dictionary<string, JToken>() { { "rpc", rpc } });
+            return CreateBodyJson(new Dictionary<string, JToken>() { { "rpc", rpc }, { "address", address } });
         }
 
         public string CreateContractRequest(string rpc, string contract, string abi, string function, params object[] args)
         {
             return CreateBodyJson(new Dictionary<string, JToken>() { { "rpc", rpc }, { "contract", contract }, { "abi", abi }, { "function", function }, { "params", JToken.FromObject(args) } });
+        }
+
+        public string CreateAccountsRequest(int registers, string password)
+        {
+            return CreateBodyJson(new Dictionary<string, JToken>() { { "registers", registers }, { "password", password} });
+        }
+
+        public string CreateSendRequest(string rpc, string to, string amount)
+        {
+            return CreateBodyJson(new Dictionary<string, JToken>() { { "rpc", rpc }, { "to", to}, { "amount", amount } });
         }
         #endregion
 
@@ -370,7 +413,7 @@ namespace Ektishaf
 
         public void Log(string message)
         {
-            if (config.ShowLogs) Debug.Log(message);
+            if (Config.ShowLogs) Debug.Log(message);
         }
         #endregion
     }
