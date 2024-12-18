@@ -26,7 +26,11 @@ namespace Ektishaf
         protected virtual void Awake()
         {
             Config = Resources.Load<BlockchainSettings>("BlockchainSettings");
-            CurrentNetwork = Config.Networks[0];
+
+            if (Config.HasAnyNetwork())
+            {
+                CurrentNetwork = Config.Networks[0];
+            }
         }
         #endregion
 

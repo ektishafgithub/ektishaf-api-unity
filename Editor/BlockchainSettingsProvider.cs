@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 public class BlockchainSettingsProvider : SettingsProvider
@@ -17,6 +18,9 @@ public class BlockchainSettingsProvider : SettingsProvider
     {
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("Networks"));
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("Accounts"));
+        EditorGUILayout.Space(10, true);
+
+        EditorGUIUtility.labelWidth = 256;
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("MaxAccountsPerRequest"));
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("GenerateAccountsWithPassword"));
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("AssetGateway"));
@@ -28,6 +32,6 @@ public class BlockchainSettingsProvider : SettingsProvider
     [SettingsProvider]
     public static SettingsProvider CreateBlockchainSettingsProvider()
     {
-        return new BlockchainSettingsProvider("Project/Ektishaf", SettingsScope.Project);
+        return new BlockchainSettingsProvider("Project/Ektishaf Blockchain Settings", SettingsScope.Project);
     }
 }

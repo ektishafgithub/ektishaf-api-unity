@@ -21,11 +21,11 @@ public class BlockchainSettings : ScriptableObject
 
     [SerializeField]
     [Range(1, 5)]
-    [Tooltip("How many accounts to create when a request is made from Ektishaf->Generate New Accounts.")]
+    [Tooltip("How many new accounts to create when Ektishaf->Generate New Accounts is clicked.")]
     public int MaxAccountsPerRequest;
 
     [SerializeField]
-    [Tooltip("When a request is made to create new accounts, this password will be used for all of them. Make sure to modify (if needed) and remember this before Generate New Accounts.")]
+    [Tooltip("The password to be used for newly generated accounts. Make sure to modify (if needed) and remember this before Generate New Accounts.")]
     public string GenerateAccountsWithPassword;
 
     [SerializeField]
@@ -53,26 +53,7 @@ public class BlockchainSettings : ScriptableObject
             settings = CreateInstance<BlockchainSettings>();
             settings.Networks = new List<EktishafNetwork>();
             settings.Accounts = new List<EktishafAccount>();
-
-            // Sample Network
-            EktishafNetwork Sepolia = new EktishafNetwork();
-            Sepolia.NetworkName = "Sepolia test network";
-            Sepolia.Rpc = "https://eth-sepolia.g.alchemy.com/v2/YBy3ka0SJ5YW7aGgnz7oj-U_QUJ_pND4";
-            Sepolia.ChainId = "11155111";
-            Sepolia.CurrencySymbol = "SepoliaETH";
-            Sepolia.BlockExplorer = "https://sepolia.etherscan.io";
-            settings.Networks.Add(Sepolia);
-
-            // Sample Account
-            EktishafAccount SampleAccount;
-            SampleAccount.Address = "0xf0deb67ec9064794211e14938c639728bda2481a";
-            SampleAccount.Ticket = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0IjoiZ29yIiwicGFzc3dvcmQiOiJFa3Rpc2hhZiBBaHdheiIsImVuY3J5cHRpb24iOiJ7XCJhZGRyZXNzXCI6XCJmMGRlYjY3ZWM5MDY0Nzk0MjExZTE0OTM4YzYzOTcyOGJkYTI0ODFhXCIsXCJpZFwiOlwiZmZkYWVjOTUtOThjMi00YTdiLWI1YzItYWQ0YzZkYjNkZWY5XCIsXCJ2ZXJzaW9uXCI6MyxcIkNyeXB0b1wiOntcImNpcGhlclwiOlwiYWVzLTEyOC1jdHJcIixcImNpcGhlcnBhcmFtc1wiOntcIml2XCI6XCIyMWIyODY2ZjdlMjJkMTc2MjRhMTM4YWY2NDhmM2EzN1wifSxcImNpcGhlcnRleHRcIjpcImQ1NzFjOWZjNGRkN2Q5NGE2MGRkMjIwYzY0ZWRjZDlmZGQyNGYxMmU3ODVkZDEzM2Q0ZWI4OTc1OWM0OTFlNmRcIixcImtkZlwiOlwic2NyeXB0XCIsXCJrZGZwYXJhbXNcIjp7XCJzYWx0XCI6XCI3NmVjNzcxMDc2NTc0OTkzOWY3ZDliOTM0MjM3YTFlY2RhYjNiMzYzNDI3ZDk5OGY3OGFmMTdiNTMxYzVmODIwXCIsXCJuXCI6MTMxMDcyLFwiZGtsZW5cIjozMixcInBcIjoxLFwiclwiOjh9LFwibWFjXCI6XCI2ZGYyNTMwODQ4ZWY1MjI3MjNmYzU5MWJkZjVmYzU1ZmI3MTg0ODFiZjA2MzRkYWQ1Y2M4MWE5ZTlmMDZiN2FmXCJ9LFwieC1ldGhlcnNcIjp7XCJjbGllbnRcIjpcImV0aGVycy82LjEzLjJcIixcImdldGhGaWxlbmFtZVwiOlwiVVRDLS0yMDI0LTA4LTIzVDExLTQzLTAwLjBaLS1mMGRlYjY3ZWM5MDY0Nzk0MjExZTE0OTM4YzYzOTcyOGJkYTI0ODFhXCIsXCJwYXRoXCI6XCJtLzQ0Jy82MCcvMCcvMC8wXCIsXCJsb2NhbGVcIjpcImVuXCIsXCJtbmVtb25pY0NvdW50ZXJcIjpcImVkOGI4OTllNWVhMzU0ZDc5MGRmMDAxOGRlMzc3M2NmXCIsXCJtbmVtb25pY0NpcGhlcnRleHRcIjpcImU1NDZjNTBlYzVhZTcxNzlmNDMyNDFkYzFiZjJhM2I4XCIsXCJ2ZXJzaW9uXCI6XCIwLjFcIn19IiwiaWF0IjoxNzI0ODE5NzM5LCJleHAiOjE3MjQ5MDYxMzl9.2QPVZ6t_AHWKDdPTzj25Fj41dMzF764CagpFWKFGPuA";
-            settings.Accounts.Add(SampleAccount);
-
-            settings.MaxAccountsPerRequest = 5;
-
-            settings.AssetGateway = "https://azure-elaborate-quelea-290.mypinata.cloud/ipfs";
-            settings.MetadataHash = "QmRE6YQTpQxu725mXr5usqVGfcwGZFJrxDGjnZgCr7Ruso";
+            settings.MaxAccountsPerRequest = 2;
             settings.ShowLogs = true;
             
             AssetDatabase.CreateAsset(settings, AssetPath);
@@ -86,16 +67,39 @@ public class BlockchainSettings : ScriptableObject
         return new SerializedObject(GetOrCreateSettings());
     }
 
-    public EktishafNetwork GetNetwork(string ChainId)
+    public bool HasAnyNetwork()
     {
         if (Networks.Count <= 0)
         {
-            Debug.Log("Failed to obtain networks from Project Settings->Ektishaf->Blockchain->Networks");
+            Debug.LogError($"No network found in Project Settings->Ektishaf Blockchain Settings->Networks, please add at least one network.");
+            return false;
+        }
+        return true;
+    }
+
+    public bool IsValidNetwork(EktishafNetwork Network)
+    {
+        if(string.IsNullOrEmpty(Network.Rpc) || string.IsNullOrWhiteSpace(Network.Rpc) ||
+           string.IsNullOrEmpty(Network.ChainId) || string.IsNullOrWhiteSpace(Network.ChainId) ||
+           string.IsNullOrEmpty(Network.CurrencySymbol) || string.IsNullOrWhiteSpace(Network.CurrencySymbol))
+        {
+            Debug.LogError($"Specified network is not a valid network, make sure it has at least Rpc, ChainId and CurrencySymbol information.");
+            return false;
+        }
+        return true;
+    }
+
+    public EktishafNetwork GetNetwork(string ChainId)
+    {
+        if (!HasAnyNetwork())
+        {
             return new EktishafNetwork();
         }
 
         foreach (var Network in Networks)
         {
+            if (!IsValidNetwork(Network)) continue;
+
             if (Network.ChainId.ToUpper().Equals(ChainId.ToUpper()))
             {
                 return Network;

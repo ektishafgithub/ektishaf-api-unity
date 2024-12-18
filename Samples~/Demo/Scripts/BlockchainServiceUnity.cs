@@ -399,6 +399,8 @@ public class BlockchainServiceUnity : BlockchainService
 
     public void Register()
     {
+        if (!Config.IsValidNetwork(CurrentNetwork)) return;
+
         ShowLoading();
         Register(RegisterPasswordInputField.text, (success, address, ticket, error) =>
         {
@@ -417,6 +419,8 @@ public class BlockchainServiceUnity : BlockchainService
 
     public void Login()
     {
+        if (!Config.IsValidNetwork(CurrentNetwork)) return;
+
         EktishafAccount account = Config.GetAccount(LoginAddressDropdown.options[LoginAddressDropdown.value].text);
         ShowLoading();
         Login(account.Ticket, LoginPasswordInputField.text, (success, address, ticket, error) =>
@@ -436,6 +440,8 @@ public class BlockchainServiceUnity : BlockchainService
 
     public void Import()
     {
+        if (!Config.IsValidNetwork(CurrentNetwork)) return;
+
         ShowLoading();
         External(ImportPrivateKeyInputField.text, ImportPasswordInputField.text, (success, address, ticket, error) =>
         {
