@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,44 +14,38 @@ public class BlockchainServiceUnity : BlockchainService
 
     public WidgetSwitcher PanelWidgetSwitcher;
     public WidgetSwitcher TabWidgetSwitcher;
-
-    public TextMeshProUGUI AddressText;
-    public TextMeshProUGUI BalanceText;
-
     public Button RegisterButton;
     public Button RegisterSubmitButton;
-    public TMP_InputField RegisterPasswordInputField;
-
     public Button LoginButton;
     public Button LoginSubmitButton;
-    public TMP_Dropdown LoginAddressDropdown;
-    public TMP_InputField LoginPasswordInputField;
-
     public Button ImportButton;
     public Button ImportSubmitButton;
-    public TMP_InputField ImportPrivateKeyInputField;
-    public TMP_InputField ImportPasswordInputField;
-
     public Button AccountWalletButton;
     public Button AccountSendButton;
     public Button AccountToggleButton;
     public Button AccountContinueButton;
-    public TMP_Dropdown AccountToAddressDropdown;
+    public Button AccountNftButton;
+    public Button AccountMarketButton;
+    public Button BackButton;
+    public TextMeshProUGUI AddressText;
+    public TextMeshProUGUI BalanceText;
+    public TextMeshProUGUI MessageNftPanel;
+    public TextMeshProUGUI MessageMarketPanel;
+    public TMP_InputField RegisterPasswordInputField;
+    public TMP_InputField LoginPasswordInputField;
+    public TMP_InputField ImportPrivateKeyInputField;
+    public TMP_InputField ImportPasswordInputField;
     public TMP_InputField AccountToAddressInputField;
     public TMP_InputField AccountToAmountInputField;
-
-    public Button AccountNftButton;
-    public Button NftToggleButton;
-    public Button NftContinueButton;
-    public TMP_Dropdown NftToAddressDropdown;
-    public TMP_InputField NftToAddressInputField;
-    public TMP_InputField NftToAmountInputField;
-
-    public Button BackButton;
+    public TMP_Dropdown LoginAddressDropdown;
+    public TMP_Dropdown AccountToAddressDropdown;
     public GameObject PanelLoading;
     public GameObject NftContent;
+    public GameObject ListingsContent;
+    public GameObject Prefab;
 
     private List<GameObject> nfts;
+    private List<GameObject> listings;
     private int SelectedItem;
     #endregion
 
@@ -84,150 +77,37 @@ public class BlockchainServiceUnity : BlockchainService
     private void Start()
     {
         nfts = new List<GameObject>();
+        listings = new List<GameObject>();
         Init();
-        
-        foreach (EktishafAccount account in Config.Accounts)
-        {
-            LoginAddressDropdown.options.Add(new TMP_Dropdown.OptionData() { text = account.Address.ToUpper() });
-            AccountToAddressDropdown.options.Add(new TMP_Dropdown.OptionData() { text = account.Address.ToUpper() });
-            NftToAddressDropdown.options.Add(new TMP_Dropdown.OptionData() { text = account.Address.ToUpper() });
-        }
-
-        if(RegisterButton)
-        {
-            RegisterButton.onClick.AddListener(() => { PanelWidgetSwitcher.SetActiveWidgetIndex(1); BackButton.gameObject.SetActive(true); });
-        }
-        if (RegisterSubmitButton)
-        {
-            RegisterSubmitButton.onClick.AddListener(() => { Register(); });
-        }
-        if (LoginButton)
-        {
-            LoginButton.onClick.AddListener(() => { PanelWidgetSwitcher.SetActiveWidgetIndex(3); BackButton.gameObject.SetActive(true); });
-        }
-        if (LoginSubmitButton)
-        {
-            LoginSubmitButton.onClick.AddListener(() => { Login(); });
-        }
-        if (ImportButton)
-        {
-            ImportButton.onClick.AddListener(() => { PanelWidgetSwitcher.SetActiveWidgetIndex(2); BackButton.gameObject.SetActive(true); });
-        }
-        if (ImportSubmitButton)
-        {
-            ImportSubmitButton.onClick.AddListener(() => { Import(); });
-        }
-        if (AccountWalletButton)
-        {
-            AccountWalletButton.onClick.AddListener(() => { TabWidgetSwitcher.SetActiveWidgetIndex(0); Balance(); });
-        }
-        if (AccountSendButton)
-        {
-            AccountSendButton.onClick.AddListener(() => { TabWidgetSwitcher.SetActiveWidgetIndex(2); });
-        }
-        if (AccountToggleButton)
-        {
-            AccountToggleButton.onClick.AddListener(() => 
-            {
-                if (AccountToAddressDropdown.gameObject.activeSelf)
-                {
-                    AccountToAddressDropdown.gameObject.SetActive(false);
-                    AccountToAddressInputField.gameObject.SetActive(true);
-                }
-                else if (AccountToAddressInputField.gameObject.activeSelf)
-                {
-                    AccountToAddressDropdown.gameObject.SetActive(true);
-                    AccountToAddressInputField.gameObject.SetActive(false);
-                }
-            });
-        }
-        if (AccountContinueButton)
-        {
-            AccountContinueButton.onClick.AddListener(() => 
-            {
-                ShowLoading();
-                string to = AccountToAddressDropdown.gameObject.activeSelf ? AccountToAddressDropdown.options[AccountToAddressDropdown.value].text : AccountToAddressInputField.text;
-                Send(CurrentNetwork.Rpc, to.ToLower(), AccountToAmountInputField.text, CurrentAccount.Ticket, (success, jsonObject, error) =>
-                {
-                    HideLoading();
-                    TabWidgetSwitcher.SetActiveWidgetIndex(0);
-                    Balance();
-                });
-            });
-        }
-        if (AccountNftButton)
-        {
-            AccountNftButton.onClick.AddListener(() => { TabWidgetSwitcher.SetActiveWidgetIndex(1); GetNfts(); });
-        }
-        if (NftToggleButton)
-        {
-            NftToggleButton.onClick.AddListener(() => 
-            {
-                if (NftToAddressDropdown.gameObject.activeSelf)
-                {
-                    NftToAddressDropdown.gameObject.SetActive(false);
-                    NftToAddressInputField.gameObject.SetActive(true);
-                }
-                else if (NftToAddressInputField.gameObject.activeSelf)
-                {
-                    NftToAddressDropdown.gameObject.SetActive(true);
-                    NftToAddressInputField.gameObject.SetActive(false);
-                }
-            });
-        }
-        if (NftContinueButton)
-        {
-            NftContinueButton.onClick.AddListener(() => 
-            {
-                ShowLoading();
-                string to = NftToAddressDropdown.gameObject.activeSelf ? NftToAddressDropdown.options[NftToAddressDropdown.value].text : NftToAddressInputField.text;
-                Write(CurrentNetwork.Rpc, EktishafNftCollection.Address, EktishafNftCollection.safeTransferFrom_5_Address_Address_Uint256_Uint256_Bytes, (success, JsonObject, error) =>
-                {
-                    if(success)
-                    {
-                        HideLoading();
-                        TabWidgetSwitcher.SetActiveWidgetIndex(1);
-                        GetNfts();
-                    }
-                }, CurrentAccount.Ticket, new object[] { CurrentAccount.Address.ToLower(), to.ToLower(), 0, NftToAmountInputField.text, "0x"});
-
-            });
-        }
-        if(BackButton)
-        {
-            BackButton.gameObject.SetActive(false);
-            BackButton.onClick.AddListener(() => 
-            {
-                if (PanelWidgetSwitcher.ActiveWidgetIndex == 4 && TabWidgetSwitcher.ActiveWidgetIndex != 0)
-                {
-                    TabWidgetSwitcher.SetActiveWidgetIndex(0);
-                    Balance();
-                }
-                else
-                {
-                    BackButton.gameObject.SetActive(false);
-                    PanelWidgetSwitcher.SetActiveWidgetIndex(0);
-
-                    AddressText.text = "0x";
-                    BalanceText.text = $"0 {CurrentNetwork.CurrencySymbol}";
-
-                    ClearNfts();
-                }
-            });
-        }
+        RefreshAddressDropDowns();
+        BindListeners();
+        BackButton.gameObject.SetActive(false);
     }
 
     private void OnDisable()
     {
         WalletConnectedEvent -= Event_WalletConnected;
     }
+
+    private void OnDestroy()
+    {
+        UnbindListeners();
+    }
     #endregion
 
     #region UI Methods
-    public void ShowLoading()
+    public void ShowLoading(bool autoHide = true)
     {
+        if(IsInvoking(nameof(HideLoading)))
+        {
+            CancelInvoke(nameof(HideLoading));
+        }
         PanelLoading.SetActive(true);
-        Invoke(nameof(HideLoading), 10f);
+
+        if (autoHide)
+        {
+            Invoke(nameof(HideLoading), 10f);
+        }
     }
 
     public void HideLoading()
@@ -235,10 +115,22 @@ public class BlockchainServiceUnity : BlockchainService
         PanelLoading.SetActive(false);
     }
 
+    public void RefreshAddressDropDowns()
+    {
+        LoginAddressDropdown.options.Clear();
+        AccountToAddressDropdown.options.Clear();
+        foreach (EktishafAccount account in Config.Accounts)
+        {
+            LoginAddressDropdown.options.Add(new TMP_Dropdown.OptionData() { text = account.Address.ToUpper() });
+            AccountToAddressDropdown.options.Add(new TMP_Dropdown.OptionData() { text = account.Address.ToUpper() });
+        }
+    }
+
     public void Reset()
     {
         CurrentAccount = new EktishafAccount();
         ClearNfts();
+        ClearListings();
         BalanceText.gameObject.SetActive(false);
     }
     #endregion
@@ -256,42 +148,34 @@ public class BlockchainServiceUnity : BlockchainService
         nfts.Clear();
     }
 
-    private void AddNft(int id, int amount, string uri)
+    public void ClearListings()
     {
-        GameObject nftItem = new GameObject(id.ToString());
-        nftItem.AddComponent<CanvasRenderer>();
-
-        LayoutElement layoutElement = nftItem.AddComponent<LayoutElement>();
-        layoutElement.minWidth = 720;
-        layoutElement.minHeight = 405;
-        layoutElement.preferredWidth = 720;
-        layoutElement.preferredHeight = 405;
-
-        GameObject label = new GameObject("Label");
-        TextMeshProUGUI textMesh = label.AddComponent<TextMeshProUGUI>();
-        textMesh.text = $"Id: {id}, Amount: {amount}";
-
-        label.transform.SetParent(nftItem.transform);
-        label.transform.localScale = Vector3.one;
-
-        RawImage image = nftItem.AddComponent<RawImage>();
-
-        NftUI nftUI = nftItem.AddComponent<NftUI>();
-        nftUI.uri = uri;
-        nftUI.id = id;
-        nftUI.amount = amount;
-
-        Button optionButton = nftItem.AddComponent<Button>();
-        optionButton.onClick.AddListener(() =>
+        if (ListingsContent.transform.childCount > 0)
         {
-            SelectedItem = id;
-            TabWidgetSwitcher.SetActiveWidgetIndex(3);
-        });
+            for (int i = 0; i < ListingsContent.transform.childCount; i++)
+            {
+                Destroy(ListingsContent.transform.GetChild(i).gameObject);
+            }
+        }
+        listings.Clear();
+    }
 
-        nftItem.transform.SetParent(NftContent.transform);
-        nftItem.transform.localScale = Vector3.one;
+    private void AddNft(List<string> nft)
+    {
+        GameObject item = Instantiate(Prefab);
+        item.GetComponent<EktishafNftUI>().Init(nft);
+        item.transform.SetParent(NftContent.transform);
+        item.transform.localScale = Vector3.one;
+        nfts.Add(item);
+    }
 
-        nfts.Add(nftItem);
+    private void AddListing(List<string> nft)
+    {
+        GameObject item = Instantiate(Prefab);
+        item.GetComponent<EktishafNftUI>().Init(nft);
+        item.transform.SetParent(ListingsContent.transform);
+        item.transform.localScale = Vector3.one;
+        listings.Add(item);
     }
 
     private void AddNfts(List<List<string>> _nfts)
@@ -300,57 +184,54 @@ public class BlockchainServiceUnity : BlockchainService
         {
             foreach (var nft in _nfts)
             {
-                AddNft(int.Parse(nft[0]), int.Parse(nft[1]), nft[2]);
+                if (EktishafNft.HasZeroTokens(nft) || EktishafNft.IsListForSale(nft)) continue;
+                AddNft(nft);
             }
         }
+        MessageNftPanel.gameObject.SetActive(nfts.Count <= 0 ? true : false);
     }
 
-    private bool HasPendingDownloads()
+    private void AddListings(List<List<string>> _nfts)
     {
-        if (nfts.Count > 0)
+        if (_nfts.Count > 0)
         {
-            foreach (GameObject nft in nfts)
+            foreach (var nft in _nfts)
             {
-                if (!nft.GetComponent<NftUI>().isDownloaded)
-                {
-                    return true;
-                }
+                if (EktishafNft.HasZeroTokens(nft) || !EktishafNft.IsListForSale(nft)) continue;
+                AddListing(nft);
             }
         }
-        return false;
+        MessageMarketPanel.gameObject.SetActive(listings.Count <= 0 ? true : false);
     }
 
     private void DownloadNfts()
     {
-        if(nfts.Count > 0)
+        if (nfts.Count > 0)
         {
             foreach (GameObject nft in nfts)
             {
-                NftUI nftUI = nft.GetComponent<NftUI>();
-                if (!nftUI.isDownloaded)
+                EktishafNftUI nftUI = nft.GetComponent<EktishafNftUI>();
+                if (!nftUI.IsDownloaded)
                 {
-                    nftUI.GetRawImage();
+                    nftUI.Download();
                 }
             }
         }
     }
 
-    private IEnumerator WaitForPendingNftsCoroutine()
+    private void DownloadListings()
     {
-        if (nfts.Count > 0)
+        if (listings.Count > 0)
         {
-            while (HasPendingDownloads())
+            foreach (GameObject listing in listings)
             {
-                ShowLoading();
-                yield return new WaitForSeconds(1f);
+                EktishafNftUI nftUI = listing.GetComponent<EktishafNftUI>();
+                if (!nftUI.IsDownloaded)
+                {
+                    nftUI.Download();
+                }
             }
-            HideLoading();
         }
-    }
-
-    private void WaitForPendingNfts()
-    {
-        StartCoroutine(WaitForPendingNftsCoroutine());
     }
 
     private void GrabNfts(List<List<string>> _nfts)
@@ -358,7 +239,13 @@ public class BlockchainServiceUnity : BlockchainService
         ClearNfts();
         AddNfts(_nfts);
         DownloadNfts();
-        WaitForPendingNfts();
+    }
+
+    private void GrabListings(List<List<string>> _nfts)
+    {
+        ClearListings();
+        AddListings(_nfts);
+        DownloadListings();
     }
     #endregion
 
@@ -369,7 +256,11 @@ public class BlockchainServiceUnity : BlockchainService
         account.Address = e.address;
         account.Ticket = e.ticket;
         CurrentAccount = account;
-
+        if (!Config.HasAccount(CurrentAccount.Address))
+        {
+            Config.Accounts.Add(CurrentAccount);
+        }
+        
         AddressText.text = $"{e.address.Substring(0, 5)}...{e.address.Substring(e.address.Length - 5, 5)}";
         BalanceText.text = $"0 {CurrentNetwork.CurrencySymbol}";
         PanelWidgetSwitcher.SetActiveWidgetIndex(4);
@@ -399,7 +290,7 @@ public class BlockchainServiceUnity : BlockchainService
 
     public void Register()
     {
-        if (!Config.IsValidNetwork(CurrentNetwork)) return;
+        if (!EktishafNetwork.IsValid(CurrentNetwork)) return;
 
         ShowLoading();
         Register(RegisterPasswordInputField.text, (success, address, ticket, error) =>
@@ -419,7 +310,7 @@ public class BlockchainServiceUnity : BlockchainService
 
     public void Login()
     {
-        if (!Config.IsValidNetwork(CurrentNetwork)) return;
+        if (!EktishafNetwork.IsValid(CurrentNetwork)) return;
 
         EktishafAccount account = Config.GetAccount(LoginAddressDropdown.options[LoginAddressDropdown.value].text);
         ShowLoading();
@@ -440,7 +331,7 @@ public class BlockchainServiceUnity : BlockchainService
 
     public void Import()
     {
-        if (!Config.IsValidNetwork(CurrentNetwork)) return;
+        if (!EktishafNetwork.IsValid(CurrentNetwork)) return;
 
         ShowLoading();
         External(ImportPrivateKeyInputField.text, ImportPasswordInputField.text, (success, address, ticket, error) =>
@@ -458,14 +349,34 @@ public class BlockchainServiceUnity : BlockchainService
         });
     }
 
+    [ContextMenu("Reveal Wallet UnitTest")]
+    public void Reveal()
+    {
+        if (!EktishafNetwork.IsValid(CurrentNetwork)) return;
+
+        ShowLoading();
+        Reveal(CurrentAccount.Ticket, "password", (success, address, publicKey, privateKey, phrase, error) =>
+        {
+            if (success)
+            {
+                Log($"Wallet revealed: Address: {address}, PrivateKey: {privateKey}");
+            }
+            else
+            {
+                Log($"Failed to reveal wallet.");
+            }
+            HideLoading();
+        });
+    }
+
     public void Balance()
     {
-        Balance(CurrentNetwork.Rpc, CurrentAccount.Address, (success, balance, balanceString, error) =>
+        Balance(CurrentNetwork.Rpc, CurrentAccount.Address, (success, balance, error) =>
         {
             if (success)
             {
                 Log($"Balance: {balance}");
-                BalanceText.text = $"{balanceString} {CurrentNetwork.CurrencySymbol}";
+                BalanceText.text = $"{balance} {CurrentNetwork.CurrencySymbol}";
             }
             else
             {
@@ -474,10 +385,10 @@ public class BlockchainServiceUnity : BlockchainService
         });
     }
 
-    public void GetNfts()
+    public void GetNfts(int index)
     {
         ShowLoading();
-        Read(CurrentNetwork.Rpc, EktishafNftCollection.Address, EktishafNftCollection.getNfts_0_, (success, JsonObject, error) =>
+        Read(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.getNfts_1_Uint256, (success, JsonObject, error) =>
         {
             if (success)
             {
@@ -490,18 +401,81 @@ public class BlockchainServiceUnity : BlockchainService
             {
                 Log("Couldn't get data: " + error);
             }
-        }, CurrentAccount.Ticket);
+            HideLoading();
+        }, CurrentAccount.Ticket, new object[] { index });
+    }
+
+    public void GetListings(int index)
+    {
+        ShowLoading();
+        Read(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.getListings_1_Uint256, (success, JsonObject, error) =>
+        {
+            if (success)
+            {
+                Log(JsonObject["data"].ToString());
+                JArray JsonArray = JArray.FromObject(JsonObject["data"]);
+                List<List<string>> nftList = JsonConvert.DeserializeObject<List<List<string>>>(JsonArray.ToString());
+                GrabListings(nftList);
+            }
+            else
+            {
+                Log("Couldn't get data: " + error);
+            }
+            HideLoading();
+        }, CurrentAccount.Ticket, new object[] { index });
+    }
+
+    public void Mint(string to, int id, int amount, string uri)
+    {
+        if (!EktishafAccount.IsValid(to))
+        {
+            Log($"Address {to} is not a valid address.");
+            return;
+        }
+
+        if (id == 0 || amount == 0 || uri.Length == 0)
+        {
+            Log("Can not mint with zero or empty values.");
+            return;
+        }
+
+        Write(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.mint_4_Address_Uint256_Uint256_String, (success, JsonObject, error) =>
+        {
+            if (success)
+            {
+                Log(JsonObject["data"].ToString());
+            }
+            else
+            {
+                Log("Couldn't write data: " + error);
+            }
+        }, CurrentAccount.Ticket, new object[] { to, id, amount, uri });
     }
 
     public void MintBatch(string to, int[] ids, int[] amounts, string[] uris)
     {
+        if (!EktishafAccount.IsValid(to))
+        {
+            Log($"Address {to} is not a valid address.");
+            return;
+        }
+
         if (ids.Length != amounts.Length || ids.Length != uris.Length)
         {
             Log("Incorrect mint parameters");
             return;
         }
-        
-        Write(CurrentNetwork.Rpc, EktishafNftCollection.Address, EktishafNftCollection.mintBatch_4_Address_Uint256Array_Uint256Array_StringArray, (success, JsonObject, error) =>
+
+        for (int i = 0; i < ids.Length; i++)
+        {
+            if (ids[i] == 0 || amounts[i] == 0 || uris[i].Length == 0)
+            {
+                Log("Can not mint with zero or empty values.");
+                return;
+            }
+        }
+
+        Write(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.mintBatch_4_Address_Uint256Array_Uint256Array_StringArray, (success, JsonObject, error) =>
         {
             if (success)
             {
@@ -512,6 +486,196 @@ public class BlockchainServiceUnity : BlockchainService
                 Log("Couldn't write data: " + error);
             }
         }, CurrentAccount.Ticket, new object[] { to, ids, amounts, uris });
+    }
+
+    public void Sell(int id, int listAmount, System.Numerics.BigInteger listPrice)
+    {
+        ShowLoading(false);
+        Write(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.sell_3_Uint256_Uint256_Uint256, (bool success, JObject jsonObject, string error) =>
+            {
+                if (success)
+                {
+                    GetNfts(0);
+
+                }
+                else
+                {
+                    HideLoading();
+                }
+            },
+            CurrentAccount.Ticket, new object[] { id, listAmount, listPrice });
+    }
+
+    public void Unlist(int id)
+    {
+        ShowLoading(false);
+        Write(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.unlist_1_Uint256, (bool success, JObject jsonObject, string error) =>
+            {
+                if (success)
+                {
+                    GetListings(0);
+                }
+                else
+                {
+                    HideLoading();
+                }
+            },
+            CurrentAccount.Ticket, new object[] { id });
+    }
+
+    public void Buy(string seller, int id, System.Numerics.BigInteger listPrice)
+    {
+        ShowLoading(false);
+        Write(CurrentNetwork.Rpc, DemoContract.Address, DemoContract.buy_2_Address_Uint256, (bool success, JObject jsonObject, string error) =>
+            {
+                if (success)
+                {
+                    GetListings(0);
+
+                }
+                else
+                {
+                    HideLoading();
+                }
+            },
+            CurrentAccount.Ticket, EktishafMathHelper.ParseWei(listPrice).TrimEnd('0'), new object[] { seller, id });
+    }
+    #endregion
+
+    #region Bind/Unbind Events
+    private void BindButton(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (button)
+        {
+            button.onClick.AddListener(action);
+        }
+    }
+    private void UnbindButton(Button button)
+    {
+        if (button)
+        {
+            button.onClick.RemoveAllListeners();
+        }
+    }
+
+    private void BindListeners()
+    {
+        BindButton(RegisterButton, () =>
+        {
+            PanelWidgetSwitcher.SetActiveWidgetIndex(1);
+            BackButton.gameObject.SetActive(true);
+        });
+
+        BindButton(RegisterSubmitButton, () =>
+        {
+            Register();
+        });
+
+        BindButton(LoginButton, () =>
+        {
+            RefreshAddressDropDowns();
+            PanelWidgetSwitcher.SetActiveWidgetIndex(3);
+            BackButton.gameObject.SetActive(true);
+        });
+
+        BindButton(LoginSubmitButton, () =>
+        {
+            Login();
+        });
+
+        BindButton(ImportButton, () =>
+        {
+            PanelWidgetSwitcher.SetActiveWidgetIndex(2);
+            BackButton.gameObject.SetActive(true);
+        });
+
+        BindButton(ImportSubmitButton, () =>
+        {
+            Import();
+        });
+
+        BindButton(AccountWalletButton, () =>
+        {
+            TabWidgetSwitcher.SetActiveWidgetIndex(0); Balance();
+        });
+
+        BindButton(AccountSendButton, () =>
+        {
+            TabWidgetSwitcher.SetActiveWidgetIndex(2);
+        });
+
+        BindButton(AccountToggleButton, () =>
+        {
+            if (AccountToAddressDropdown.gameObject.activeSelf)
+            {
+                AccountToAddressDropdown.gameObject.SetActive(false);
+                AccountToAddressInputField.gameObject.SetActive(true);
+            }
+            else if (AccountToAddressInputField.gameObject.activeSelf)
+            {
+                AccountToAddressDropdown.gameObject.SetActive(true);
+                AccountToAddressInputField.gameObject.SetActive(false);
+            }
+        });
+
+        BindButton(AccountContinueButton, () =>
+        {
+            ShowLoading();
+            string to = AccountToAddressDropdown.gameObject.activeSelf ? AccountToAddressDropdown.options[AccountToAddressDropdown.value].text : AccountToAddressInputField.text;
+            SendEther(CurrentNetwork.Rpc, to.ToLower(), AccountToAmountInputField.text, CurrentAccount.Ticket, (success, jsonObject, error) =>
+            {
+                HideLoading();
+                TabWidgetSwitcher.SetActiveWidgetIndex(0);
+                Balance();
+            });
+        });
+
+        BindButton(AccountNftButton, () =>
+        {
+            TabWidgetSwitcher.SetActiveWidgetIndex(1); GetNfts(0);
+        });
+
+        BindButton(AccountMarketButton, () =>
+        {
+            TabWidgetSwitcher.SetActiveWidgetIndex(3); GetListings(0);
+        });
+
+        BindButton(BackButton, () =>
+        {
+            if (PanelWidgetSwitcher.ActiveWidgetIndex == 4 && TabWidgetSwitcher.ActiveWidgetIndex != 0)
+            {
+                TabWidgetSwitcher.SetActiveWidgetIndex(0);
+                Balance();
+            }
+            else
+            {
+                BackButton.gameObject.SetActive(false);
+                PanelWidgetSwitcher.SetActiveWidgetIndex(0);
+
+                AddressText.text = "0x";
+                BalanceText.text = $"0 {CurrentNetwork.CurrencySymbol}";
+
+                ClearNfts();
+                ClearListings();
+            }
+        });
+    }
+
+    private void UnbindListeners()
+    {
+        UnbindButton(RegisterButton);
+        UnbindButton(RegisterSubmitButton);
+        UnbindButton(LoginButton);
+        UnbindButton(LoginSubmitButton);
+        UnbindButton(ImportButton);
+        UnbindButton(ImportSubmitButton);
+        UnbindButton(AccountWalletButton);
+        UnbindButton(AccountSendButton);
+        UnbindButton(AccountToggleButton);
+        UnbindButton(AccountContinueButton);
+        UnbindButton(AccountNftButton);
+        UnbindButton(AccountMarketButton);
+        UnbindButton(BackButton);
     }
     #endregion
 }

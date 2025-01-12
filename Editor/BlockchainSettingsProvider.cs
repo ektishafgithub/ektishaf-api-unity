@@ -17,7 +17,9 @@ public class BlockchainSettingsProvider : SettingsProvider
     public override void OnGUI(string searchContext)
     {
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("Networks"));
+        EditorGUILayout.PropertyField(blockchainSettings.FindProperty("DefaultNetworkIndex"));
         EditorGUILayout.PropertyField(blockchainSettings.FindProperty("Accounts"));
+        EditorGUILayout.PropertyField(blockchainSettings.FindProperty("DefaultAccountIndex"));
         EditorGUILayout.Space(10, true);
 
         EditorGUIUtility.labelWidth = 256;

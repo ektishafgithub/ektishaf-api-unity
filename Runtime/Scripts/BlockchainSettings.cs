@@ -16,24 +16,32 @@ public class BlockchainSettings : ScriptableObject
     public List<EktishafNetwork> Networks;
 
     [SerializeField]
-    [Tooltip("A list of accounts to be used for development purposes. To generate, please click Ektishaf->Generate New Accounts.")]
+    [Tooltip("The default selected network index from the network list.")]
+    public int DefaultNetworkIndex;
+
+    [SerializeField]
+    [Tooltip("A list of accounts to be used for development purposes.")]
     public List<EktishafAccount> Accounts;
 
     [SerializeField]
+    [Tooltip("The default selected account index from the account list.")]
+    public int DefaultAccountIndex;
+
+    [SerializeField]
     [Range(1, 5)]
-    [Tooltip("How many new accounts to create when Ektishaf->Generate New Accounts is clicked.")]
+    [Tooltip("How many new accounts to generate when \'Ektishaf->Account->Generate New Accounts\' is clicked from the menu.")]
     public int MaxAccountsPerRequest;
 
     [SerializeField]
-    [Tooltip("The password to be used for newly generated accounts. Make sure to modify (if needed) and remember this before Generate New Accounts.")]
+    [Tooltip("The password to be used for newly generated accounts. Make sure to modify (if needed) before clicking 'Ektishaf->Account->Generate New Accounts' from the menu.")]
     public string GenerateAccountsWithPassword;
 
     [SerializeField]
-    [Tooltip("An IPFS url to access NFT's assets path on blockchain. i.e. Pinata gateway url. (Only for contract owner)")]
+    [Tooltip("An IPFS url to access NFT's assets path on blockchain. i.e. Pinata gateway url. (Required for minting only)")]
     public string AssetGateway;
 
     [SerializeField]
-    [Tooltip("The metadata hash obtained when all metadatas are uploaded for the NFTs. (Only for contract owner)")]
+    [Tooltip("The metadata hash obtained when all metadatas are uploaded for the NFTs. (Required for minting only)")]
     public string MetadataHash;
 
     [SerializeField]
@@ -77,18 +85,6 @@ public class BlockchainSettings : ScriptableObject
         return true;
     }
 
-    public bool IsValidNetwork(EktishafNetwork Network)
-    {
-        if(string.IsNullOrEmpty(Network.Rpc) || string.IsNullOrWhiteSpace(Network.Rpc) ||
-           string.IsNullOrEmpty(Network.ChainId) || string.IsNullOrWhiteSpace(Network.ChainId) ||
-           string.IsNullOrEmpty(Network.CurrencySymbol) || string.IsNullOrWhiteSpace(Network.CurrencySymbol))
-        {
-            Debug.LogError($"Specified network is not a valid network, make sure it has at least Rpc, ChainId and CurrencySymbol information.");
-            return false;
-        }
-        return true;
-    }
-
     public EktishafNetwork GetNetwork(string ChainId)
     {
         if (!HasAnyNetwork())
@@ -98,7 +94,7 @@ public class BlockchainSettings : ScriptableObject
 
         foreach (var Network in Networks)
         {
-            if (!IsValidNetwork(Network)) continue;
+            if (!EktishafNetwork.IsValid(Network)) continue;
 
             if (Network.ChainId.ToUpper().Equals(ChainId.ToUpper()))
             {
@@ -109,16 +105,61 @@ public class BlockchainSettings : ScriptableObject
         return new EktishafNetwork();
     }
 
-    public EktishafAccount GetAccount(string Address)
+    public EktishafNetwork GetDefaultNetwork()
+    {
+        if (!HasAnyNetwork())
+        {
+            return new EktishafNetwork();
+        }
+
+        if (DefaultNetworkIndex >= Networks.Count)
+        {
+            Debug.Log($"No network found at the default network index: {DefaultNetworkIndex}");
+            return new EktishafNetwork();
+        }
+
+        if (!EktishafNetwork.IsValid(Networks[DefaultNetworkIndex]))
+        {
+            Debug.Log($"Network found at the default network index: {DefaultNetworkIndex} is not a valid network.");
+            return new EktishafNetwork();
+        }
+        return Networks[DefaultNetworkIndex];
+    }
+
+    public bool HasAnyAccount()
     {
         if (Accounts.Count <= 0)
         {
-            Debug.Log("Failed to obtain accounts from Project Settings->Game->Ektishaf->Accounts->Accounts");
+            Debug.LogError($"No account found in Project Settings->Ektishaf Blockchain Settings->Accounts, please add at least one account.");
+            return false;
+        }
+        return true;
+    }
+
+    public bool HasAccount(string Address)
+    {
+        foreach (var Account in Accounts)
+        {
+            if(Account.Address.ToUpper().Equals(Address.ToUpper()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public EktishafAccount GetAccount(string Address)
+    {
+        if (!HasAnyNetwork())
+        {
+            Debug.Log("Failed to obtain accounts from Project Settings->Ektishaf Blockchain Settings->Accounts");
             return new EktishafAccount();
         }
 
         foreach (var Account in Accounts)
         {
+            if (!EktishafAccount.IsValid(Account.Address) || Account.Ticket.Length == 0) continue;
+
             if (Account.Address.ToUpper().Equals(Address.ToUpper()))
             {
                 return Account;
@@ -126,6 +167,28 @@ public class BlockchainSettings : ScriptableObject
         }
         Debug.Log($"No account found with the address: {Address}");
         return new EktishafAccount();
+    }
+
+    public EktishafAccount GetDefaultAccount()
+    {
+        if (!HasAnyNetwork())
+        {
+            Debug.Log("Failed to obtain accounts from Project Settings->Ektishaf Blockchain Settings->Accounts");
+            return new EktishafAccount();
+        }
+
+        if (DefaultAccountIndex >= Accounts.Count)
+        {
+            Debug.Log($"No account found at the default account index: {DefaultAccountIndex}");
+            return new EktishafAccount();
+        }
+
+        if (!EktishafAccount.IsValid(Accounts[DefaultAccountIndex].Address) || Accounts[DefaultAccountIndex].Ticket.Length == 0)
+        {
+            Debug.Log($"Account found at the default account index: {DefaultAccountIndex} is not a valid account.");
+            return new EktishafAccount();
+        }
+        return Accounts[DefaultAccountIndex];
     }
 
     private string GetUrl(string api = "")
@@ -147,20 +210,21 @@ public class BlockchainSettings : ScriptableObject
     {
         switch(servOp)
         {
-            case ServOp.None:     return GetUrl();
-            case ServOp.Register: return GetUrl("register");
-            case ServOp.Login:    return GetUrl("login");
-            case ServOp.External: return GetUrl("external");
-            case ServOp.Reveal:   return GetUrl("reveal");
-            case ServOp.Sign:     return GetUrl("sign");
-            case ServOp.Verify:   return GetUrl("verify");
-            case ServOp.Balance:  return GetUrl("balance");
-            case ServOp.ABI:      return GetUrl("abi");
-            case ServOp.Read:     return GetUrl("read");
-            case ServOp.Write:    return GetUrl("write");
-            case ServOp.Accounts: return GetUrl("accounts");
-            case ServOp.Send:     return GetUrl("send");
-            default:              return GetUrl();
+            case ServOp.None:           return GetUrl();
+            case ServOp.Register:       return GetUrl("register");
+            case ServOp.Login:          return GetUrl("login");
+            case ServOp.External:       return GetUrl("external");
+            case ServOp.Reveal:         return GetUrl("reveal");
+            case ServOp.Sign:           return GetUrl("sign");
+            case ServOp.Verify:         return GetUrl("verify");
+            case ServOp.Balance:        return GetUrl("balance");
+            case ServOp.ABI:            return GetUrl("abi");
+            case ServOp.Read:           return GetUrl("read");
+            case ServOp.Write:          return GetUrl("write");
+            case ServOp.WriteWithValue: return GetUrl("writeWithValue");
+            case ServOp.Accounts:       return GetUrl("accounts");
+            case ServOp.Send:           return GetUrl("send");
+            default:                    return GetUrl();
         }
     }
 }

@@ -1,8 +1,8 @@
 {
   "name": "com.ektishaf.api",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "displayName": "Blockchain API",
-  "description": "This is an official package for Blockchain API which enables the game to interact with EVM based smart contracts with ease, whether it be NFTs or other tokens. \n\nMain features: \n\u25AA Create new wallets or import existing wallets at runtime \n\u25AA Seemless transaction experience, no need to go out of the game \n\u25AA Build-in NFT smart contract provided for implemention right away\n\nNote: Please keep track of the latest updates on our official website\nhttps://www.ektishaf.com",
+  "description": "This is an official package of Blockchain API that brings gaming and blockchain together, whether it be NFTs or other tokens. \n\nMain features: \n\n\u25AA Simplify blockchain onboarding with built-in wallet creation functionality. Users can securely generate and manage their wallets directly within your game\n\u25AA Ensure smooth, intuitive, and hassle-free seamless cryptocurrency transactions\n\u25AA Easily mint, display, and interact with NFTs (Non-Fungible Tokens). Whether for collectibles, in-game assets, or rewards, the toolkit includes everything to bring NFTs into your project\n\u25AA Build your custom marketplace for users to buy, sell, and trade NFTs or other digital assets\n\nNote: Please keep track of the latest updates on our official website\nhttps://www.ektishaf.com",
   "unity": "2022.1",
   "documentationUrl": "https://ektishaf.com/documentation",
   "dependencies": {
@@ -16,7 +16,7 @@
 "samples": [
         {
             "displayName": "Blockchain API Demo",
-            "description": "Contains a demo to demonstrate blockchain communication",
+            "description": "Contains a demo to demonstrate wallet connect, blockchain communication and marketplace",
             "path": "Samples~/Demo"
         }
     ]
